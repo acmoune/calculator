@@ -26,8 +26,20 @@ jacocoTestCoverageVerification {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+  testImplementation 'io.cucumber:cucumber-java:6.9.0'
+  testImplementation 'io.cucumber:cucumber-junit:6.9.0'
 }
 
 test {
 	useJUnitPlatform()
+}
+
+task acceptanceTest(type: Test) {
+  include '**/acceptance/**'
+  systemProperties System.getProperties()
+}
+
+test {
+  exclude '**/acceptance/**'
 }

@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    triggers {
+        pollSCM('* * * * *')
+    }
     stages {
         stage("Compile") {
             steps {
@@ -23,6 +26,45 @@ pipeline {
                 ])
                 sh "./gradlew jacocoTestCoverageVerification"
             }
+        }
+
+        stage("Package") {
+            steps {
+                sh "./gradlew build"
+            }
+        }
+
+        stage("Docker build") {
+            steps {
+                sh "docker build -t acmoune/calculator ."
+            }
+        }
+
+        stage("Docker push") {
+            steps {
+                sh "docker login --username acmoune --password elmaljag#2"
+                sh "docker push acmoune/calculator"
+            }
+        }
+
+        stage("Deploy to staging") {
+            steps {
+                sh "docker run -d --rm -p 8765:8080 --name calculator acmoune/calculator"
+            }
+        }
+
+        stage("Acceptance test") {
+            steps {
+                sleep 60
+                sh "./gradlew acceptanceTest -Dcalculator.url=http://localhost:8765"
+                // sh "chmod +x acceptance_test.sh && ./acceptance_test.sh"
+            }
+        }
+    }
+
+    post {
+        always {
+            sh "docker stop calculator"
         }
     }
 }
