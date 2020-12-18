@@ -36,17 +36,18 @@ pipeline {
 
         stage("Docker build") {
             steps {
-                sh "docker build -t acmoune/calculator ."
+                sh "docker build -t acmoune/calculator:gke ."
             }
         }
 
         stage("Docker push") {
             steps {
                 sh "docker login --username acmoune --password elmaljag#2"
-                sh "docker push acmoune/calculator"
+                sh "docker push acmoune/calculator:gke"
             }
         }
 
+        /*
         stage("Deploy to staging") {
             steps {
                 sh "docker run -d --rm -p 8765:8080 --name calculator acmoune/calculator"
@@ -58,6 +59,15 @@ pipeline {
                 sleep 60
                 sh "./gradlew acceptanceTest -Dcalculator.url=http://172.17.0.1:8765"
                 // sh "chmod +x acceptance_test.sh && ./acceptance_test.sh"
+            }
+        }
+        */
+
+        stage("Deploy on GKE") {
+            steps {
+                sh "kubectl apply -f hazelcast.yaml"
+                sh "kubectl apply -f deployment.yaml"
+                sh "kubectl apply -f service.yaml"
             }
         }
     }
