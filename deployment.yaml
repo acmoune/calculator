@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: calculator
-          image: acmoune/calculator:caching.1
+          image: acmoune/calculator:gke
           ports:
             - containerPort: 8080
           readinessProbe:
